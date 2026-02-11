@@ -1,4 +1,4 @@
-# MethodChannel Playground 🛠️
+# MethodChannel Playground
 
 A complete Flutter application demonstrating how to communicate between Dart and Native Android (Kotlin).
 
@@ -6,7 +6,7 @@ A complete Flutter application demonstrating how to communicate between Dart and
 
 This project covers everything from basic calls to complex data streams and real-world connectivity monitoring.
 
-## 🚀 Features
+## Features
 
 ### 1. Basic MethodCalls (Request/Response)
 *   **Get Greeting:** Sends a String argument (`name`) -> Returns a String.
@@ -25,7 +25,7 @@ This project covers everything from basic calls to complex data streams and real
 *   **Random Stream:** Configurable stream (Arguments: `min`, `max`) that emits random numbers.
 *   **Network Monitor:** Real-time connectivity status (Connected/Disconnected) using `ConnectivityManager`.
 
-## 📂 Project Structure
+## Project Structure
 
 We use a **Chain of Responsibility** pattern to keep `MainActivity.kt` clean.
 
@@ -38,11 +38,11 @@ We use a **Chain of Responsibility** pattern to keep `MainActivity.kt` clean.
     *   `RandomStreamHandler.kt`: Handles the configurable random number stream.
     *   `NetworkHandler.kt`: Handles the real-world network monitor.
 
-## 🛠️ Setup & Running
+## Setup & Running
 
 1.  **Open in Android Studio/VS Code.**
 2.  **Run the App:** `flutter run`
 3.  **Permissions:** The app uses `ACCESS_NETWORK_STATE` (already added to `AndroidManifest.xml`).
 
-## 🐞 Debugging
+## Debugging
 See `debugging_guide.md` for common errors like `MissingPluginException` or `PlatformException`.
