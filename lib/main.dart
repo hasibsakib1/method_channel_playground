@@ -23,6 +23,67 @@ class _MethodChannelPageState extends State<MethodChannelPage> {
   static const randomChannel = EventChannel('com.example.playground/random');
   StreamSubscription? _randomSubscription;
 
+  // TASK 11: Network Monitor
+  bool?
+  _isNetworkAvailable; // null = unknown, true = connected, false = disconnected
+  static const networkChannel = EventChannel('com.example.playground/network');
+  StreamSubscription? _networkSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    // Optional: Start monitoring immediately?
+    // Let's stick to buttons for manual control as per the pattern.
+  }
+
+  Future<void> _checkNetwork() async {
+    try {
+      final bool result = await platform.invokeMethod('isNetworkAvailable');
+      setState(() {
+        _isNetworkAvailable = result;
+        _log.insert(
+          0,
+          '[Network] Check: ${result ? "Connected" : "No Internet"}',
+        );
+      });
+    } on PlatformException catch (e) {
+      setState(() {
+        _log.insert(0, '[Network] Check Failed: ${e.message}');
+      });
+    }
+  }
+
+  void _toggleNetworkMonitor(bool enable) {
+    if (enable) {
+      if (_networkSubscription != null) return;
+      setState(() {
+        _log.insert(0, '[Network] Monitoring started...');
+      });
+      _networkSubscription = networkChannel.receiveBroadcastStream().listen(
+        (dynamic event) {
+          // event is "Connected" or "Disconnected" String from Native
+          setState(() {
+            _isNetworkAvailable = (event == "Connected");
+            _log.insert(0, '[Network Stream] $event');
+          });
+        },
+        onError: (dynamic error) {
+          setState(() {
+            _log.insert(0, '[Network Stream Error] ${error.message}');
+          });
+        },
+      );
+    } else {
+      if (_networkSubscription != null) {
+        _networkSubscription!.cancel();
+        _networkSubscription = null;
+        setState(() {
+          _log.insert(0, '[Network] Monitoring stopped.');
+        });
+      }
+    }
+  }
+
   Future<void> _invoke(String taskName, Function action) async {
     setState(() {
       _log.insert(0, '[$taskName] Running...');
@@ -203,6 +264,36 @@ class _MethodChannelPageState extends State<MethodChannelPage> {
                       ),
                       child: const Text('Stop Random'),
                     ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                const Divider(),
+                const Text(
+                  "Task 11: Network Monitor",
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 10),
+                Icon(
+                  _isNetworkAvailable == true ? Icons.wifi : Icons.wifi_off,
+                  size: 50,
+                  color: _isNetworkAvailable == true
+                      ? Colors.green
+                      : (_isNetworkAvailable == false
+                            ? Colors.red
+                            : Colors.grey),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton(
+                      onPressed: _checkNetwork,
+                      child: const Text('Check Status'),
+                    ),
+                    Switch(
+                      value: _networkSubscription != null,
+                      onChanged: _toggleNetworkMonitor,
+                    ),
+                    const Text("Monitor"),
                   ],
                 ),
               ],
