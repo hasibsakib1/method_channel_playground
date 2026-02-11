@@ -13,7 +13,19 @@ class MainActivity: FlutterActivity() {
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler {
             call, result ->
             
-            if (call.method == "getGreeting") {
+            // TASK 3: Compute Sum
+            if (call.method == "computeSum") {
+                val a = call.argument<Int>("a")
+                val b = call.argument<Int>("b")
+                
+                if (a != null && b != null) {
+                    val sum = a + b
+                    // Returning an Int. MethodChannel handles the type conversion.
+                    result.success(sum)
+                } else {
+                    result.error("INVALID_ARGS", "Numbers are null", null)
+                }
+            } else if (call.method == "getGreeting") {
                 val name = call.argument<String>("name")
                 
                 if (name != null) {

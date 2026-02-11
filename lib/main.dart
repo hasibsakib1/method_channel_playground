@@ -15,53 +15,70 @@ class MethodChannelPage extends StatefulWidget {
 class _MethodChannelPageState extends State<MethodChannelPage> {
   static const platform = MethodChannel('com.example.playground/channel');
 
-  String _nativeMessage = 'No data from native yet';
-  final TextEditingController _controller = TextEditingController();
+  // TASK 3: Two controllers for numbers
+  final TextEditingController _num1Controller = TextEditingController();
+  final TextEditingController _num2Controller = TextEditingController();
 
-  Future<void> _getNativeData() async {
+  String _nativeResult = 'Result: -';
+
+  Future<void> _computeSum() async {
     String message;
     try {
-      final String result = await platform.invokeMethod('getGreeting', {
-        'name': _controller.text.isEmpty ? 'Anonymous' : _controller.text,
+      final int num1 = int.tryParse(_num1Controller.text) ?? 0;
+      final int num2 = int.tryParse(_num2Controller.text) ?? 0;
+
+      // 2. INVOKE METHOD: Sending integers
+      // Note: We expect an 'int' back, not a String!
+      final int sum = await platform.invokeMethod('computeSum', {
+        'a': num1,
+        'b': num2,
       });
-      message = result;
+      message = 'Result: $sum';
     } on PlatformException catch (e) {
-      message = "Failed to get native data: '${e.message}'.";
+      message = "Error: '${e.message}'.";
     }
 
     setState(() {
-      _nativeMessage = message;
+      _nativeResult = message;
     });
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _num1Controller.dispose();
+    _num2Controller.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Task 2: Sending Arguments')),
+      appBar: AppBar(title: const Text('Task 3: Compute Sum (Native)')),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             TextField(
-              controller: _controller,
-              decoration: const InputDecoration(
-                labelText: 'Enter your name',
-                border: OutlineInputBorder(),
-              ),
+              controller: _num1Controller,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(labelText: 'Number A'),
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: _num2Controller,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(labelText: 'Number B'),
             ),
             const SizedBox(height: 20),
-            Text(_nativeMessage, style: const TextStyle(fontSize: 20)),
+            Text(
+              _nativeResult,
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: _getNativeData,
-              child: const Text('Get Greeting'),
+              onPressed: _computeSum,
+              child: const Text('Compute Sum on Native'),
             ),
           ],
         ),
