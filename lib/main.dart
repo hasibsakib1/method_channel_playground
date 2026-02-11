@@ -15,70 +15,50 @@ class MethodChannelPage extends StatefulWidget {
 class _MethodChannelPageState extends State<MethodChannelPage> {
   static const platform = MethodChannel('com.example.playground/channel');
 
-  // TASK 3: Two controllers for numbers
-  final TextEditingController _num1Controller = TextEditingController();
-  final TextEditingController _num2Controller = TextEditingController();
+  // TASK 4: Error Handling demonstration
+  String _status = 'Ready';
 
-  String _nativeResult = 'Result: -';
-
-  Future<void> _computeSum() async {
+  Future<void> _forceError() async {
     String message;
     try {
-      final int num1 = int.tryParse(_num1Controller.text) ?? 0;
-      final int num2 = int.tryParse(_num2Controller.text) ?? 0;
-
-      // 2. INVOKE METHOD: Sending integers
-      // Note: We expect an 'int' back, not a String!
-      final int sum = await platform.invokeMethod('computeSum', {
-        'a': num1,
-        'b': num2,
-      });
-      message = 'Result: $sum';
+      // 2. INVOKE METHOD: Calling a method that intentionally fails
+      await platform.invokeMethod('forceError');
+      message = 'Success! (Should not happen)';
     } on PlatformException catch (e) {
-      message = "Error: '${e.message}'.";
+      // 3. CATCH ERROR: We catch the error sent from Native
+      message =
+          "Caught error:\nCode: ${e.code}\nMessage: ${e.message}\nDetails: ${e.details}";
+    } catch (e) {
+      // Catching other errors (like the one you caused earlier!)
+      message = "Unknown error: $e";
     }
 
     setState(() {
-      _nativeResult = message;
+      _status = message;
     });
-  }
-
-  @override
-  void dispose() {
-    _num1Controller.dispose();
-    _num2Controller.dispose();
-    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Task 3: Compute Sum (Native)')),
+      appBar: AppBar(title: const Text('Task 4: Error Handling')),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            TextField(
-              controller: _num1Controller,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: 'Number A'),
-            ),
-            const SizedBox(height: 10),
-            TextField(
-              controller: _num2Controller,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: 'Number B'),
-            ),
-            const SizedBox(height: 20),
             Text(
-              _nativeResult,
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              _status,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 18, color: Colors.red),
             ),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: _computeSum,
-              child: const Text('Compute Sum on Native'),
+              onPressed: _forceError,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red.shade100,
+              ),
+              child: const Text('Force Native Error'),
             ),
           ],
         ),

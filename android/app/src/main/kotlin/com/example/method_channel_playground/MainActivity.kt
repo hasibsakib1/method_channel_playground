@@ -13,8 +13,14 @@ class MainActivity: FlutterActivity() {
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler {
             call, result ->
             
-            // TASK 3: Compute Sum
-            if (call.method == "computeSum") {
+            // TASK 4: Error Handling
+            if (call.method == "forceError") {
+                // 3. SEND ERROR: Send an error back to Flutter.
+                // ARG 1: Error Code (String) - used to identify the error type.
+                // ARG 2: Error Message (String) - human readable description.
+                // ARG 3: Error Details (Any?) - extra data (Map, String, etc).
+                result.error("INTENTIONAL_ERROR", "This is a test error message.", mapOf("error" to "error", "code" to "101", "details" to "Here are some extra details."))
+            } else if (call.method == "computeSum") {
                 val a = call.argument<Int>("a")
                 val b = call.argument<Int>("b")
                 
