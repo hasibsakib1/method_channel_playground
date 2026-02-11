@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -17,6 +18,10 @@ class _MethodChannelPageState extends State<MethodChannelPage> {
 
   // TASK 6: All-in-One Dashboard
   final List<String> _log = [];
+  static const eventChannel = EventChannel('com.example.playground/events');
+  StreamSubscription? _timerSubscription;
+  static const randomChannel = EventChannel('com.example.playground/random');
+  StreamSubscription? _randomSubscription;
 
   Future<void> _invoke(String taskName, Function action) async {
     setState(() {
@@ -31,6 +36,73 @@ class _MethodChannelPageState extends State<MethodChannelPage> {
     } catch (e) {
       setState(() {
         _log.insert(0, '[$taskName] Error: $e');
+      });
+    }
+  }
+
+  void _startTimer() {
+    if (_timerSubscription != null) return;
+
+    setState(() {
+      _log.insert(0, '[EventChannel] Listening to stream...');
+    });
+
+    _timerSubscription = eventChannel.receiveBroadcastStream().listen(
+      (dynamic event) {
+        setState(() {
+          _log.insert(0, '[Stream] $event');
+        });
+      },
+      onError: (dynamic error) {
+        setState(() {
+          _log.insert(0, '[Stream Error] ${error.message}');
+        });
+      },
+      cancelOnError: false,
+    );
+  }
+
+  void _stopTimer() {
+    if (_timerSubscription != null) {
+      _timerSubscription!.cancel();
+      _timerSubscription = null;
+      setState(() {
+        _log.insert(0, '[EventChannel] Stream cancelled.');
+      });
+    }
+  }
+
+  void _startRandom() {
+    if (_randomSubscription != null) return;
+
+    setState(() {
+      _log.insert(0, '[Random] Listening to stream...');
+    });
+
+    // pass Map as argument
+    _randomSubscription = randomChannel
+        .receiveBroadcastStream({'min': 500, 'max': 1000})
+        .listen(
+          (dynamic event) {
+            setState(() {
+              _log.insert(0, '[Random] $event');
+            });
+          },
+          onError: (dynamic error) {
+            setState(() {
+              _log.insert(0, '[Random Error] ${error.message}');
+            });
+          },
+          cancelOnError: false,
+        );
+  }
+
+  void _stopRandom() {
+    if (_randomSubscription != null) {
+      _randomSubscription!.cancel();
+      _randomSubscription = null;
+      setState(() {
+        _log.insert(0, '[Random] Stream cancelled.');
       });
     }
   }
@@ -93,6 +165,45 @@ class _MethodChannelPageState extends State<MethodChannelPage> {
                     return await platform.invokeMethod('heavyTask');
                   }),
                   child: const Text('Task 7: Heavy Task (Async)'),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton(
+                      onPressed: _startTimer,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green.shade100,
+                      ),
+                      child: const Text('Start Stream'),
+                    ),
+                    ElevatedButton(
+                      onPressed: _stopTimer,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red.shade100,
+                      ),
+                      child: const Text('Stop Stream'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton(
+                      onPressed: _startRandom,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.purple.shade100,
+                      ),
+                      child: const Text('Start Random'),
+                    ),
+                    ElevatedButton(
+                      onPressed: _stopRandom,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.orange.shade100,
+                      ),
+                      child: const Text('Stop Random'),
+                    ),
+                  ],
                 ),
               ],
             ),

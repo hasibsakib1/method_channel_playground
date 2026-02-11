@@ -12,6 +12,8 @@ class MainActivity: FlutterActivity() {
 
         val batteryHandler = BatteryHandler(applicationContext)
         val utilityHandler = UtilityHandler()
+        val timerHandler = TimerStreamHandler()
+        val randomHandler = RandomStreamHandler()
 
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler {
             call, result ->
@@ -21,5 +23,8 @@ class MainActivity: FlutterActivity() {
 
             result.notImplemented()
         }
+
+        io.flutter.plugin.common.EventChannel(flutterEngine.dartExecutor.binaryMessenger, "com.example.playground/events").setStreamHandler(timerHandler)
+        io.flutter.plugin.common.EventChannel(flutterEngine.dartExecutor.binaryMessenger, "com.example.playground/random").setStreamHandler(randomHandler)
     }
 }
