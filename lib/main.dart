@@ -15,39 +15,48 @@ class MethodChannelPage extends StatefulWidget {
 class _MethodChannelPageState extends State<MethodChannelPage> {
   static const platform = MethodChannel('com.example.playground/channel');
 
-  // TASK 5: Battery Level
-  String _batteryLevel = 'Unknown battery level.';
+  // TASK 6: Detailed Battery Info
+  String _batteryInfo = 'No info yet';
 
-  Future<void> _getBatteryLevel() async {
+  Future<void> _getDetailedBatteryInfo() async {
     String message;
     try {
-      final int result = await platform.invokeMethod('getBatteryLevel');
-      message = 'Battery level at $result%.';
+      // 2. INVOKE METHOD: Ask for a Map of data
+      final Map<dynamic, dynamic> result = await platform.invokeMethod(
+        'getBatteryInfo',
+      );
+
+      final int level = result['level'];
+      final bool isCharging = result['isCharging'];
+      final String status = result['status'];
+
+      message = 'Level: $level%\nCharging: $isCharging\nStatus: $status';
     } on PlatformException catch (e) {
-      message = "Failed to get battery level: '${e.message}'.";
+      message = "Failed to get info: '${e.message}'.";
     }
 
     setState(() {
-      _batteryLevel = message;
+      _batteryInfo = message;
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Task 5: Battery Level')),
+      appBar: AppBar(title: const Text('Task 6: Detailed Battery Info')),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              _batteryLevel,
+              _batteryInfo,
+              textAlign: TextAlign.center,
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: _getBatteryLevel,
-              child: const Text('Get Battery Level'),
+              onPressed: _getDetailedBatteryInfo,
+              child: const Text('Get Detailed Info'),
             ),
           ],
         ),

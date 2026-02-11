@@ -19,8 +19,11 @@ class MainActivity: FlutterActivity() {
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler {
             call, result ->
             
-            // TASK 5: Get Battery Level
-            if (call.method == "getBatteryLevel") {
+            // TASK 6: Detailed Battery Info
+            if (call.method == "getBatteryInfo") {
+                val info = getBatteryInfo()
+                result.success(info)
+            } else if (call.method == "getBatteryLevel") {
                 val batteryLevel = getBatteryLevel()
                 if (batteryLevel != -1) {
                    result.success(batteryLevel)
@@ -69,5 +72,26 @@ class MainActivity: FlutterActivity() {
             batteryLevel = intent!!.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) * 100 / intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1)
         }
         return batteryLevel
+    }
+
+    private fun getBatteryInfo(): Map<String, Any> {
+        val intent = ContextWrapper(applicationContext).registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+        val level = intent!!.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) * 100 / intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1)
+        val statusInt = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1)
+        val isCharging = statusInt == BatteryManager.BATTERY_STATUS_CHARGING || statusInt == BatteryManager.BATTERY_STATUS_FULL
+        
+        val statusString = when(statusInt) {
+            BatteryManager.BATTERY_STATUS_CHARGING -> "Charging"
+            BatteryManager.BATTERY_STATUS_DISCHARGING -> "Discharging"
+            BatteryManager.BATTERY_STATUS_FULL -> "Full"
+            BatteryManager.BATTERY_STATUS_NOT_CHARGING -> "Not Charging"
+            else -> "Unknown"
+        }
+
+        return mapOf(
+            "level" to level,
+            "isCharging" to isCharging,
+            "status" to statusString
+        )
     }
 }
