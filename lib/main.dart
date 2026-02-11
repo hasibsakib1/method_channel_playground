@@ -88,6 +88,12 @@ class _MethodChannelPageState extends State<MethodChannelPage> {
                   }),
                   child: const Text('Task 5b: Get Detailed Info'),
                 ),
+                ElevatedButton(
+                  onPressed: () => _invoke('Heavy Task', () async {
+                    return await platform.invokeMethod('heavyTask');
+                  }),
+                  child: const Text('Task 7: Heavy Task (Async)'),
+                ),
               ],
             ),
           ),

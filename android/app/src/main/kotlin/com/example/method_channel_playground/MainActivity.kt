@@ -30,6 +30,22 @@ class MainActivity: FlutterActivity() {
                 } else {
                    result.error("UNAVAILABLE", "Battery level not available.", null)
                 }
+            } else if (call.method == "heavyTask") {
+                // TASK 7: Async Native Work
+                // We launch a new thread to avoid blocking the MAIN thread (UI).
+                Thread {
+                    try {
+                        Thread.sleep(3000) // Simulate 3 seconds of heavy work
+                    } catch (e: InterruptedException) {
+                        e.printStackTrace()
+                    }
+                    
+                    // CRITICAL: We must post the result back to the MAIN thread.
+                    // MethodChannel results can only be sent from the main thread.
+                    runOnUiThread {
+                        result.success("Heavy task finished after 3 seconds.")
+                    }
+                }.start()
             } else if (call.method == "forceError") {
                 // 3. SEND ERROR: Send an error back to Flutter.
                 // ARG 1: Error Code (String) - used to identify the error type.
